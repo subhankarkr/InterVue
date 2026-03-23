@@ -1,12 +1,14 @@
 import {Inngest} from "inngest"
 import {connectDB} from "./db.js"
+
 import User from "../models/User.js"
- export const inngest = new Inngest({name:"InterVue Backend"});
+ export const inngest = new Inngest({id:"InterVue Backend"});
  const deleteUserFromDB=inngest.createFunction(
     {id:"delete-user-from-db"},
     {event:"clerk.user.deleted"},
     async({event})=>{
         try{
+            
             await connectDB();
             const {id} = event.data.object;
             await User.findOneAndDelete({clerkId:id});
