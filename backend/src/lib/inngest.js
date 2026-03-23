@@ -2,7 +2,7 @@ import {Inngest} from "inngest"
 import {connectDB} from "./db.js"
 
 import User from "../models/User.js"
- export const inngest = new Inngest({id:"InterVue Backend"});
+ export const inngest = new Inngest({id:"intervue-Backend"});
  const deleteUserFromDB=inngest.createFunction(
     {id:"delete-user-from-db"},
     {event:"user.deleted"},
