@@ -5,7 +5,7 @@ import User from "../models/User.js"
  export const inngest = new Inngest({id:"InterVue Backend"});
  const deleteUserFromDB=inngest.createFunction(
     {id:"delete-user-from-db"},
-    {event:"clerk.user.deleted"},
+    {event:"user.deleted"},
     async({event})=>{
         try{
             
@@ -19,7 +19,7 @@ import User from "../models/User.js"
  )
  const syncUser=inngest.createFunction(
     {id:"sync-user"},
-    {event:"clerk.user.created"},
+    {event:"user.created"},
     async({event})=>{
         try{
             await connectDB();
