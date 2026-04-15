@@ -10,7 +10,8 @@ import User from "../models/User.js"
         try{
             
             await connectDB();
-            const {id} = event.data.object;
+            const userData = event.data.data || event.data;
+            const {id} = userData;
             await User.findOneAndDelete({clerkId:id});
         }catch(err){
             console.log("Error deleting user from DB ",err);
@@ -23,7 +24,8 @@ import User from "../models/User.js"
     async({event})=>{
         try{
             await connectDB();
-            const {id,email_addresses,first_name,last_name,image_url} = event.data.object;
+            const userData = event.data.data || event.data;
+            const {id,email_addresses,first_name,last_name,image_url} = userData;
             const newUser={
                 clerkId:id,
                 email:email_addresses?.[0]?.email_address || "",
