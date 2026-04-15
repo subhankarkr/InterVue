@@ -7,7 +7,10 @@ import {inngest} from "./lib/inngest.js"
 import { connectDB } from "./lib/db.js";    
 import { functions } from "./lib/inngest.js"
 const app =express();
-const __dirname = path.resolve()
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log(ENV.PORT)
 app.use(cors({origin:ENV.CLIENT_URL,credentials:true}));
@@ -21,9 +24,9 @@ app.get("/books",(req,res)=>{
     res.status(200).json({msg:"this is books endpoint   "});
 });
 if(ENV.NODE_ENV == "production"){
-    app.use(express.static(path.join(__dirname,"../frontend/dist")))
-    app.get("/{*any}",(req,res)=>{
-        res.sendFile(path.join(__dirname,"../frontend","dist","index.html"));
+    app.use(express.static(path.join(__dirname,"../../frontend/dist")))
+    app.get("*",(req,res)=>{
+        res.sendFile(path.join(__dirname,"../../frontend","dist","index.html"));
     })
 }
  
