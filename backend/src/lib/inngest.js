@@ -38,8 +38,8 @@ const deleteUserFromDB = inngest.createFunction(
             await connectDB();
             const userData = event.data;
             const { id } = userData;
-            await User.findOneAndDelete({ clerkId: id });
             await deleteStreamUser(id.toString());
+            await User.findOneAndDelete({ clerkId: id });
         } catch (err) {
             console.log("Error deleting user from DB ", err);
         }
