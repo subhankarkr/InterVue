@@ -2,7 +2,7 @@ import { StreamChat } from "stream-chat";
 import { ENV } from "./env.js";
 
 const apiKey = ENV.STREAM_API_KEY;
-const apiSecret = ENV.STREAM_API_SECRET;
+const apiSecret = ENV.STREAM_SECRET_KEY;
 
 if (!apiKey || !apiSecret) {
     throw new Error("Stream API key or secret not found");
