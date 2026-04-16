@@ -3,24 +3,10 @@ import { connectDB } from "./db.js"
 
 import User from "../models/User.js"
 export const inngest = new Inngest({ id: "intervue-Backend" });
-const deleteUserFromDB = inngest.createFunction(
-    { id: "delete-user-from-db" },
-    { event: "clerk/user.deleted" },
-    async ({ event }) => {
-        try {
 
-            await connectDB();
-            const userData = event.data;
-            const { id } = userData;
-            await User.findOneAndDelete({ clerkId: id });
-        } catch (err) {
-            console.log("Error deleting user from DB ", err);
-        }
-    }
-)
 const syncUser = inngest.createFunction(
     { id: "sync-user" },
-    { event: "clerk/user.created" },
+    { event: "user.created" },
     async ({ event }) => {
         try {
             await connectDB();
@@ -33,8 +19,30 @@ const syncUser = inngest.createFunction(
                 profileImage: image_url || ""
             }
             await User.create(newUser);
+            await upsertStreamUser({
+                id: newUser.clerkId.toString(),
+                name: newUser.name,
+                image: newUser.profileImage
+            })
         } catch (err) {
             console.log("Error syncing user ", err);
         }
     })
+
+const deleteUserFromDB = inngest.createFunction(
+    { id: "delete-user-from-db" },
+    { event: "user.deleted" },
+    async ({ event }) => {
+        try {
+
+            await connectDB();
+            const userData = event.data;
+            const { id } = userData;
+            await User.findOneAndDelete({ clerkId: id });
+            await deleteStreamUser(id.toString());
+        } catch (err) {
+            console.log("Error deleting user from DB ", err);
+        }
+    }
+)
 export const functions = [syncUser, deleteUserFromDB];
