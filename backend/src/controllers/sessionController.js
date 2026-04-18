@@ -1,4 +1,5 @@
-
+import Session from "../models/Session.js";
+import { streamClient, chatClient } from "../lib/stream.js";
 
 export async function createSession(req, res) {
     try{
@@ -22,7 +23,7 @@ export async function createSession(req, res) {
             },
         });
         const channel=chatClient.channel("messaging",callId,{
-            name:`{problem} Session`,
+            name:`${problem} Session`,
             created_by_id: clerkId,
             members:[clerkId]
         })
@@ -78,27 +79,37 @@ export async function getSessionById(req, res) {
     }
 }
 export async function joinSession(req, res) {
-    try{
-        const {id} = req.params;
-        const userId = req.user._id;
-        const clerkId = req.user.clerkId;
-        const session = await Session.findById(id);
-        if(!session){
-            return res.status(404).json({msg: "Session not found"});
-        }
-        if(session.participant){
-            return res.status(400).json({msg: "Session is full"});
-        }
-        session.participant = userId;
-        await session.save();
-        const channel = chatClient.channel("messaging", session.callId);
-        await channel.addMembers([clerkId]);
-        res.status(200).json({msg: "Successfully joined session"});
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const clerkId = req.user.clerkId;
+
+    const session = await Session.findById(id);
+
+    if (!session) return res.status(404).json({ message: "Session not found" });
+
+    if (session.status !== "active") {
+      return res.status(400).json({ message: "Cannot join a completed session" });
     }
-    catch(err){
-        console.error(err);
-        res.status(500).json({msg: "Server error"});        
+
+    if (session.host.toString() === userId.toString()) {
+      return res.status(400).json({ message: "Host cannot join their own session as participant" });
     }
+
+    // check if session is already full - has a participant
+    if (session.participant) return res.status(409).json({ message: "Session is full" });
+
+    session.participant = userId;
+    await session.save();
+
+    const channel = chatClient.channel("messaging", session.callId);
+    await channel.addMembers([clerkId]);
+
+    res.status(200).json({ session });
+  } catch (error) {
+    console.log("Error in joinSession controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 }
 
 export async function endSession(req, res) {
@@ -115,12 +126,13 @@ export async function endSession(req, res) {
         if(session.status === "completed"){
             return res.status(400).json({msg: "Session is already completed"});
         }
-        session.status = "completed";
-        await session.save();
-        const call = await streamClient.video.call("default", session.callId);
+      
+        const call = streamClient.video.call("default", session.callId);
         await call.delete({hard:true});
         const channel = chatClient.channel("messaging", session.callId);
         await channel.delete();
+          session.status = "completed";
+        await session.save();
         res.status(200).json({msg: "Session ended successfully"});
     }
     catch(err){
