@@ -7,11 +7,14 @@ import { serve } from "inngest/express"
 import { inngest } from "./lib/inngest.js"
 import { connectDB } from "./lib/db.js";
 import { functions } from "./lib/inngest.js"
-const app = express();
 import { fileURLToPath } from 'url';
 import chatRoutes from "./routes/chatRoutes.js";
+import sessionRoutes from "./routes/sessionRoute.js";
 import { protectRoute } from "./middlewares/protectRoute.js";
 
+
+
+const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -22,6 +25,8 @@ app.use(clerkMiddleware());
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/chat",chatRoutes);
+app.use("/api/sessions",sessionRoutes);
+
 app.get("/health", (req, res) => {
     res.status(200).json({ msg: "app is up and running" });
 });
