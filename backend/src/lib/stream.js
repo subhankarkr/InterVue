@@ -7,7 +7,7 @@ const apiSecret = ENV.STREAM_SECRET_KEY;
 if (!apiKey || !apiSecret) {
     throw new Error("Stream API key or secret not found");
 }
-export const streamClient = StreamChat.getInstance(apiKey, apiSecret);
+export const streamClient = new StreamClient(apiKey, apiSecret);
 export const chatClient = StreamChat.getInstance(apiKey, apiSecret);
 export const upsertStreamUser = async (userData) => {
     try {
